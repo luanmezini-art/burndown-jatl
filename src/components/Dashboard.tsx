@@ -26,7 +26,7 @@ export function Dashboard() {
                             </div>
                         ))}
                     </div>
-                    <span className="text-sm text-gray-500 font-medium px-2">Team JALT</span>
+                    <span className="text-sm text-gray-500 font-medium px-2">Team JATL</span>
                 </div>
             </header>
 
