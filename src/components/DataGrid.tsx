@@ -77,7 +77,6 @@ export function DataGrid({ memberFilter }: DataGridProps) {
                                                     min="0"
                                                     max="24"
                                                     placeholder="-"
-                                                    disabled={isWeekend}
                                                     value={value}
                                                     onChange={(e) => {
                                                         const val = e.target.value;

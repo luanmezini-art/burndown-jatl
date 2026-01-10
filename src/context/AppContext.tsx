@@ -4,9 +4,9 @@ import type { AppContextType, AppState, DailyLog, TeamMember } from '../lib/type
 import { supabase } from '../lib/supabase';
 
 const defaultState: AppState = {
-    projectName: 'Sprint 1',
-    startDate: format(new Date(), 'yyyy-MM-dd'),
-    endDate: format(addDays(new Date(), 14), 'yyyy-MM-dd'),
+    projectName: 'Projekt JATL',
+    startDate: '2025-09-09',
+    endDate: '2026-01-15',
     initialBudget: 250,
     logs: {},
 };
