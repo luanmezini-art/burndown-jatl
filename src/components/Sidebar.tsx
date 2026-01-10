@@ -1,12 +1,12 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
 // ... imports need to include Menu and X from lucide-react
-import { Calendar, Settings, RotateCcw, Download, Menu, X } from 'lucide-react';
+import { Calendar, Settings, RotateCcw, Download, Menu, X, LogOut } from 'lucide-react';
 import { exportToExcel } from '../lib/export';
 import { useState } from 'react';
 
 export function Sidebar() {
-    const { projectName, startDate, endDate, setProjectName, setStartDate, setEndDate, resetData, logs, initialBudget } = useApp();
+    const { projectName, startDate, endDate, setProjectName, setStartDate, setEndDate, resetData, logs, initialBudget, logout } = useApp();
     const [isOpen, setIsOpen] = useState(false);
 
     return (
@@ -103,6 +103,14 @@ export function Sidebar() {
                     >
                         <RotateCcw size={16} />
                         Daten zurücksetzen
+                    </button>
+
+                    <button
+                        onClick={logout}
+                        className="flex items-center gap-2 text-slate-500 hover:text-slate-700 hover:bg-slate-50 px-4 py-2 rounded-lg w-full transition-colors text-sm font-medium mt-2"
+                    >
+                        <LogOut size={16} />
+                        Abmelden
                     </button>
                 </div>
             </div>

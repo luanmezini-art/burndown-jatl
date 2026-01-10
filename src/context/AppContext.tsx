@@ -1,27 +1,43 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { addDays, format } from 'date-fns';
-import type { AppContextType, AppState, DailyLog, TeamMember } from '../lib/types';
+import { defaultState } from '../lib/defaultState';
+import { AppContextType, AppState, DailyLog, TeamMember } from '../lib/types';
 import { supabase } from '../lib/supabase';
-
-const defaultState: AppState = {
-    projectName: 'Projekt JATL',
-    startDate: '2025-09-09',
-    endDate: '2026-01-15',
-    initialBudget: 250,
-    logs: {},
-};
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
     const [state, setState] = useState<AppState>(defaultState);
     const [loading, setLoading] = useState(true);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-    // Initial Fetch & Subscription
+    // Login Function
+    const login = (pin: string) => {
+        const correctPin = import.meta.env.VITE_APP_PIN || '1502';
+        if (pin === correctPin) {
+            setIsAuthenticated(true);
+            localStorage.setItem('burndown_auth_success', 'true');
+            return true;
+        }
+        return false;
+    };
+
+    // Logout Function
+    const logout = () => {
+        setIsAuthenticated(false);
+        localStorage.removeItem('burndown_auth_success');
+    };
+
+    // Initial Fetch & Subscription & Auth Check
     useEffect(() => {
+        // Check Auth
+        const storedAuth = localStorage.getItem('burndown_auth_success');
+        if (storedAuth === 'true') {
+            setIsAuthenticated(true);
+        }
+
         fetchLogs();
 
-        // Subscribe to realtime changes so other users' edits appear instantly
+        // Subscribe to realtime changes
         const channel = supabase
             .channel('public:burndown_logs')
             .on(
@@ -68,7 +84,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const setEndDate = (date: string) => setState(s => ({ ...s, endDate: date }));
 
     const updateLog = async (date: string, member: TeamMember, remaining: number) => {
-        // Optimistic Update (update UI immediately)
+        // Optimistic Update
         setState(s => ({
             ...s,
             logs: {
@@ -92,10 +108,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     const resetData = async () => {
         if (confirm('Sind Sie sicher? Dies löscht ALLE Daten aus der Datenbank für alle Nutzer.')) {
-            // Delete all entries. Since we don't have a "truncate" in client easily without RLS policies preventing it, 
-            // we delete rows where remaining_hours is greater than -1 (all rows).
             const { error } = await supabase.from('burndown_logs').delete().gt('remaining_hours', -1);
-
             if (!error) {
                 setState(s => ({ ...s, logs: {} }));
             } else {
@@ -105,7 +118,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     };
 
     return (
-        <AppContext.Provider value={{ ...state, setProjectName, setStartDate, setEndDate, updateLog, resetData }}>
+        <AppContext.Provider value={{
+            ...state,
+            isAuthenticated,
+            login,
+            logout,
+            setProjectName,
+            setStartDate,
+            setEndDate,
+            updateLog,
+            resetData
+        }}>
             {children}
         </AppContext.Provider>
     );
