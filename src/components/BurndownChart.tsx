@@ -81,7 +81,7 @@ export function BurndownChart() {
     }, [startDate, endDate, logs, initialBudget]);
 
     return (
-        <div className="w-full h-[500px] bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+        <div id="burndown-chart-container" className="w-full h-[500px] bg-white rounded-xl shadow-sm border border-slate-200 p-6">
             <h3 className="text-lg font-bold mb-4 font-sans text-monday-black">Team Leistungs-Chart</h3>
             <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
@@ -141,7 +141,7 @@ export function BurndownChart() {
                             name={member}
                             stroke={COLORS[member]}
                             strokeWidth={3}
-                            dot={{ r: 4, strokeWidth: 2, fill: '#fff' }}
+                            dot={false}
                             activeDot={{ r: 6 }}
                             yAxisId="left"
                             connectNulls
