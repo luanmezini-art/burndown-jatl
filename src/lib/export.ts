@@ -2,7 +2,8 @@ import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import html2canvas from 'html2canvas';
 import { differenceInDays, addDays, format, parseISO } from 'date-fns';
-import { AppState, TEAM_MEMBERS } from './types';
+import type { AppState } from './types';
+import { TEAM_MEMBERS } from './types';
 
 export async function exportToExcel(state: AppState) {
     const { startDate, endDate, logs, projectName } = state;

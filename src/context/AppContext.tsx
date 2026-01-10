@@ -1,7 +1,14 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { defaultState } from '../lib/defaultState';
-import { AppContextType, AppState, DailyLog, TeamMember } from '../lib/types';
+import type { AppContextType, AppState, DailyLog, TeamMember } from '../lib/types';
 import { supabase } from '../lib/supabase';
+
+const defaultState: AppState = {
+    projectName: 'Projekt JATL',
+    startDate: '2025-09-09',
+    endDate: '2026-01-15',
+    initialBudget: 250,
+    logs: {},
+};
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
