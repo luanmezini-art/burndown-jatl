@@ -1,9 +1,10 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
-import { Calendar, Settings, RotateCcw } from 'lucide-react';
+import { Calendar, Settings, RotateCcw, Download } from 'lucide-react';
+import { exportToExcel } from '../lib/export';
 
 export function Sidebar() {
-    const { projectName, startDate, endDate, setProjectName, setStartDate, setEndDate, resetData } = useApp();
+    const { projectName, startDate, endDate, setProjectName, setStartDate, setEndDate, resetData, logs, initialBudget } = useApp();
 
     return (
         <div className="w-80 bg-white border-r border-slate-200 h-screen p-6 flex flex-col shadow-sm z-10">
@@ -54,7 +55,23 @@ export function Sidebar() {
                 </div>
             </div>
 
-            <div className="pt-6 border-t border-slate-100">
+            <div className="pt-6 border-t border-slate-100 space-y-3">
+                <button
+                    onClick={() => {
+                        exportToExcel({
+                            projectName,
+                            startDate,
+                            endDate,
+                            initialBudget,
+                            logs
+                        });
+                    }}
+                    className="flex items-center gap-2 text-monday-blue hover:bg-blue-50 px-4 py-2 rounded-lg w-full transition-colors text-sm font-medium"
+                >
+                    <Download size={16} />
+                    Excel Export
+                </button>
+
                 <button
                     onClick={resetData}
                     className="flex items-center gap-2 text-red-500 hover:text-red-700 hover:bg-red-50 px-4 py-2 rounded-lg w-full transition-colors text-sm font-medium"
