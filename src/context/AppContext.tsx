@@ -1,9 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { differenceInDays, addDays, format } from 'date-fns';
-import { TEAM_MEMBERS } from '../lib/types';
-import { AppContextType, AppState, DailyLog, TeamMember } from '../lib/types';
-
-const STORAGE_KEY = 'agile_dashboard_data_v1';
+import { addDays, format } from 'date-fns';
+import type { AppContextType, AppState, DailyLog, TeamMember } from '../lib/types';
+import { supabase } from '../lib/supabase';
 
 const defaultState: AppState = {
     projectName: 'Sprint 1',
@@ -16,27 +14,61 @@ const defaultState: AppState = {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-    const [state, setState] = useState<AppState>(() => {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-            try {
-                return JSON.parse(saved);
-            } catch (e) {
-                console.error('Failed to parse logs', e);
-            }
-        }
-        return defaultState;
-    });
+    const [state, setState] = useState<AppState>(defaultState);
+    const [loading, setLoading] = useState(true);
 
+    // Initial Fetch & Subscription
     useEffect(() => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    }, [state]);
+        fetchLogs();
+
+        // Subscribe to realtime changes so other users' edits appear instantly
+        const channel = supabase
+            .channel('public:burndown_logs')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'burndown_logs',
+                },
+                () => {
+                    fetchLogs();
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, []);
+
+    const fetchLogs = async () => {
+        const { data, error } = await supabase
+            .from('burndown_logs')
+            .select('*');
+
+        if (error) {
+            console.error('Error fetching logs:', error);
+            return;
+        }
+
+        if (data) {
+            const newLogs: DailyLog = {};
+            data.forEach((row: any) => {
+                if (!newLogs[row.date]) newLogs[row.date] = {};
+                newLogs[row.date][row.member as TeamMember] = row.remaining_hours;
+            });
+            setState(s => ({ ...s, logs: newLogs }));
+        }
+        setLoading(false);
+    };
 
     const setProjectName = (name: string) => setState(s => ({ ...s, projectName: name }));
     const setStartDate = (date: string) => setState(s => ({ ...s, startDate: date }));
     const setEndDate = (date: string) => setState(s => ({ ...s, endDate: date }));
 
-    const updateLog = (date: string, member: TeamMember, remaining: number) => {
+    const updateLog = async (date: string, member: TeamMember, remaining: number) => {
+        // Optimistic Update (update UI immediately)
         setState(s => ({
             ...s,
             logs: {
@@ -47,11 +79,28 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 }
             }
         }));
+
+        // Send to DB
+        const { error } = await supabase
+            .from('burndown_logs')
+            .upsert({ date, member, remaining_hours: remaining }, { onConflict: 'date,member' });
+
+        if (error) {
+            console.error("Supabase Error:", error);
+        }
     };
 
-    const resetData = () => {
-        if (confirm('Sind Sie sicher? Alle Daten gehen verloren.')) {
-            setState(defaultState);
+    const resetData = async () => {
+        if (confirm('Sind Sie sicher? Dies löscht ALLE Daten aus der Datenbank für alle Nutzer.')) {
+            // Delete all entries. Since we don't have a "truncate" in client easily without RLS policies preventing it, 
+            // we delete rows where remaining_hours is greater than -1 (all rows).
+            const { error } = await supabase.from('burndown_logs').delete().gt('remaining_hours', -1);
+
+            if (!error) {
+                setState(s => ({ ...s, logs: {} }));
+            } else {
+                console.error("Delete Error", error);
+            }
         }
     };
 
