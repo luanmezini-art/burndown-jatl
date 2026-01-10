@@ -33,9 +33,10 @@ export function BurndownChart() {
         if (days <= 0) return [];
 
         const chartData = [];
+        const cumulativeSpent: Record<string, number> = {};
 
-        // Initialize previous remaining with budget for calculation of first day burn if needed
-        // TEAM_MEMBERS.forEach(m => prevRemaining[m] = initialBudget);
+        // Initialize cumulative spent
+        TEAM_MEMBERS.forEach(m => cumulativeSpent[m] = 0);
 
         for (let i = 0; i < days; i++) {
             const currentDate = addDays(start, i);
@@ -47,23 +48,31 @@ export function BurndownChart() {
                 fullDate: dateStr,
             };
 
-            // Calculate Remaining (Lines) and Burn (Bars)
             TEAM_MEMBERS.forEach(member => {
-                let remaining = logEntry[member];
+                const dailyEffort = logEntry[member];
 
-                // Auto-fill start date with initial budget if missing
-                if (i === 0 && remaining === undefined) {
-                    remaining = initialBudget;
+                // If there is an entry, it is the "Daily Effort" (Burn)
+                if (dailyEffort !== undefined) {
+                    dataPoint[`${member}_burn`] = dailyEffort;
+                    cumulativeSpent[member] += dailyEffort;
+                } else {
+                    // No entry means 0 effort for that day
+                    dataPoint[`${member}_burn`] = 0;
                 }
 
-                dataPoint[member] = remaining;
+                // Remaining = Initial Budget - Sum of effort so far
+                // We divide initial budget by 4 members? Or is it 250 total? 
+                // Context says "Initial Budget: 250". Usually that's per team or project.
+                // But lines are per member. 
+                // Ideally budget is per member (e.g. 250 / 4 = 62.5h each?).
+                // Or does every member start at 250?
+                // Looking at previous code: `remaining = initialBudget` (if missing).
+                // So previously everyone started at 250.
+                // Let's assume everyone starts at 250 for now, or 250 is the TOTAL project budget?
+                // User's previous chart showed all lines starting at 250. Let's keep that.
 
-                const prev = i === 0 ? initialBudget : (logs[format(addDays(start, i - 1), 'yyyy-MM-dd')]?.[member] ?? initialBudget);
-
-                if (remaining !== undefined) {
-                    const burnt = prev - remaining;
-                    dataPoint[`${member}_burn`] = burnt > 0 ? burnt : 0;
-                }
+                const remaining = initialBudget - cumulativeSpent[member];
+                dataPoint[member] = remaining > 0 ? remaining : 0;
             });
 
             chartData.push(dataPoint);
