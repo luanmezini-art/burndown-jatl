@@ -80,7 +80,7 @@ export function BurndownChart() {
     }, [startDate, endDate, logs, initialBudget]);
 
     return (
-        <div id="burndown-chart-container" className="w-full h-[500px] bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+        <div id="burndown-chart-container" className="w-full h-auto min-h-[500px] bg-white rounded-xl shadow-sm border border-slate-200 p-6">
             <h3 className="text-lg font-bold mb-4 font-sans text-monday-black">Team Leistungs-Chart</h3>
             <div className="h-[400px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
