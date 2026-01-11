@@ -2,6 +2,13 @@ export type TeamMember = 'Joanna' | 'Tatiana' | 'Leman' | 'Anastasia';
 
 export const TEAM_MEMBERS: TeamMember[] = ['Joanna', 'Tatiana', 'Leman', 'Anastasia'];
 
+export const MEMBER_DISPLAY_NAMES: Record<TeamMember, string> = {
+    Joanna: 'Mezini, J.',
+    Tatiana: 'Klassen, T.',
+    Leman: 'Özel, L.',
+    Anastasia: 'Legbaum, A.'
+};
+
 export interface DailyLog {
     [date: string]: {
         [key in TeamMember]?: number; // Remaining hours

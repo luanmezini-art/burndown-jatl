@@ -12,7 +12,7 @@ import {
 } from 'recharts';
 import { differenceInDays, addDays, format, parseISO } from 'date-fns';
 import { useApp } from '../context/AppContext';
-import { TEAM_MEMBERS } from '../lib/types';
+import { TEAM_MEMBERS, MEMBER_DISPLAY_NAMES } from '../lib/types';
 
 // Monday.com colors
 const COLORS = {
@@ -123,7 +123,7 @@ export function BurndownChart() {
                         <Bar
                             key={`${member}_burn`}
                             dataKey={`${member}_burn`}
-                            name={`${member} (Leistung)`}
+                            name={`${MEMBER_DISPLAY_NAMES[member]} (Leistung)`}
                             stackId="a"
                             fill={COLORS[member]}
                             yAxisId="right"
@@ -138,7 +138,7 @@ export function BurndownChart() {
                             key={member}
                             type="monotone"
                             dataKey={member}
-                            name={member}
+                            name={MEMBER_DISPLAY_NAMES[member]}
                             stroke={COLORS[member]}
                             strokeWidth={3}
                             dot={false}

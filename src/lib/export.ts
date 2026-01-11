@@ -3,7 +3,7 @@ import { saveAs } from 'file-saver';
 import html2canvas from 'html2canvas';
 import { differenceInDays, addDays, format, parseISO } from 'date-fns';
 import type { AppState } from './types';
-import { TEAM_MEMBERS } from './types';
+import { TEAM_MEMBERS, MEMBER_DISPLAY_NAMES } from './types';
 
 export async function exportToExcel(state: AppState) {
     const { startDate, endDate, logs, projectName } = state;
@@ -23,7 +23,7 @@ export async function exportToExcel(state: AppState) {
     // 2. Define Columns
     sheet.columns = [
         { header: 'Datum', key: 'date', width: 15 },
-        ...TEAM_MEMBERS.map(m => ({ header: m, key: m, width: 15 })),
+        ...TEAM_MEMBERS.map(m => ({ header: MEMBER_DISPLAY_NAMES[m], key: m, width: 15 })),
     ];
 
     // Style Header
