@@ -7,7 +7,6 @@ import {
     YAxis,
     CartesianGrid,
     Tooltip,
-    Legend,
     ResponsiveContainer
 } from 'recharts';
 import { differenceInDays, addDays, format, parseISO } from 'date-fns';
@@ -83,72 +82,88 @@ export function BurndownChart() {
     return (
         <div id="burndown-chart-container" className="w-full h-[500px] bg-white rounded-xl shadow-sm border border-slate-200 p-6">
             <h3 className="text-lg font-bold mb-4 font-sans text-monday-black">Team Leistungs-Chart</h3>
-            <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e6e9ef" />
-                    <XAxis
-                        dataKey="date"
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{ fill: '#676879', fontSize: 12 }}
-                        dy={10}
-                    />
-                    {/* Left Axis: Remaining Hours (0 - 250) */}
-                    <YAxis
-                        yAxisId="left"
-                        label={{ value: 'Verbleibende Stunden (h)', angle: -90, position: 'insideLeft', fill: '#676879', fontSize: 12 }}
-                        domain={[0, 250]}
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{ fill: '#676879', fontSize: 12 }}
-                    />
-                    {/* Right Axis: Burned Hours */}
-                    <YAxis
-                        yAxisId="right"
-                        orientation="right"
-                        label={{ value: 'Tägliche Leistung (h)', angle: 90, position: 'insideRight', fill: '#676879', fontSize: 12 }}
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{ fill: '#676879', fontSize: 12 }}
-                        domain={[0, 10]}
-                    />
-                    <Tooltip
-                        contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                        itemStyle={{ fontSize: '13px' }}
-                    />
-                    <Legend wrapperStyle={{ paddingTop: '20px' }} />
-
-                    {/* Bars for Burned Hours (Stacked) */}
-                    {TEAM_MEMBERS.map(member => (
-                        <Bar
-                            key={`${member}_burn`}
-                            dataKey={`${member}_burn`}
-                            name={`${MEMBER_DISPLAY_NAMES[member]} (Leistung)`}
-                            stackId="a"
-                            fill={COLORS[member]}
-                            yAxisId="right"
-                            opacity={0.3} // Lighter opacity for bars
-                            radius={[2, 2, 0, 0]}
+            <div className="h-[400px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                    <ComposedChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e6e9ef" />
+                        <XAxis
+                            dataKey="date"
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fill: '#676879', fontSize: 12 }}
+                            dy={10}
                         />
-                    ))}
-
-                    {/* Lines for Remaining Hours */}
-                    {TEAM_MEMBERS.map(member => (
-                        <Line
-                            key={member}
-                            type="monotone"
-                            dataKey={member}
-                            name={MEMBER_DISPLAY_NAMES[member]}
-                            stroke={COLORS[member]}
-                            strokeWidth={3}
-                            dot={false}
-                            activeDot={{ r: 6 }}
+                        {/* Left Axis: Remaining Hours (0 - 250) */}
+                        <YAxis
                             yAxisId="left"
-                            connectNulls
+                            label={{ value: 'Verbleibende Stunden (h)', angle: -90, position: 'insideLeft', fill: '#676879', fontSize: 12 }}
+                            domain={[0, 250]}
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fill: '#676879', fontSize: 12 }}
                         />
-                    ))}
-                </ComposedChart>
-            </ResponsiveContainer>
+                        {/* Right Axis: Burned Hours */}
+                        <YAxis
+                            yAxisId="right"
+                            orientation="right"
+                            label={{ value: 'Tägliche Leistung (h)', angle: 90, position: 'insideRight', fill: '#676879', fontSize: 12 }}
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fill: '#676879', fontSize: 12 }}
+                            domain={[0, 10]}
+                        />
+                        <Tooltip
+                            contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                            itemStyle={{ fontSize: '13px' }}
+                        />
+
+                        {/* Bars for Burned Hours (Stacked) */}
+                        {TEAM_MEMBERS.map(member => (
+                            <Bar
+                                key={`${member}_burn`}
+                                dataKey={`${member}_burn`}
+                                name={`${MEMBER_DISPLAY_NAMES[member]} (Leistung)`}
+                                stackId="a"
+                                fill={COLORS[member]}
+                                yAxisId="right"
+                                opacity={0.3} // Lighter opacity for bars
+                                radius={[2, 2, 0, 0]}
+                            />
+                        ))}
+
+                        {/* Lines for Remaining Hours */}
+                        {TEAM_MEMBERS.map(member => (
+                            <Line
+                                key={member}
+                                type="monotone"
+                                dataKey={member}
+                                name={MEMBER_DISPLAY_NAMES[member]}
+                                stroke={COLORS[member]}
+                                strokeWidth={3}
+                                dot={false}
+                                activeDot={{ r: 6 }}
+                                yAxisId="left"
+                                connectNulls
+                            />
+                        ))}
+                    </ComposedChart>
+                </ResponsiveContainer>
+            </div>
+
+            {/* Custom HTML Legend for better Export Visibility */}
+            <div className="mt-4 flex flex-wrap justify-center gap-6 pt-4 border-t border-slate-100">
+                {TEAM_MEMBERS.map(member => (
+                    <div key={member} className="flex items-center gap-2">
+                        <div
+                            className="w-3 h-3 rounded-full shadow-sm"
+                            style={{ backgroundColor: COLORS[member] }}
+                        />
+                        <span className="text-sm font-medium text-slate-700">
+                            {MEMBER_DISPLAY_NAMES[member]}
+                        </span>
+                    </div>
+                ))}
+            </div>
         </div>
     );
 }
